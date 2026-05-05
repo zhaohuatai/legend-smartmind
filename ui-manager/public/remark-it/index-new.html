@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>幻灯模板 - 动态加载版</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width"
+    />
+    <link rel="stylesheet" type="text/css" href="./css/quasar.min.css" />
+    <link rel="stylesheet" type="text/css" href="./css/pure-min.css" />
+    <link rel="stylesheet" type="text/css" href="./css/spaces.css" />
+    <link rel="stylesheet" type="text/css" href="./css/typo.css" />
+    <link rel="stylesheet" type="text/css" href="./css/devices.min.css" />
+    <link rel="stylesheet" type="text/css" href="./css/gh-fork-ribbon.css" />
+    <link rel="stylesheet" type="text/css" href="./css/nord-dark.css" />
+    <link rel="stylesheet" type="text/css" href="./css/nord-light.css" />
+    <link rel="stylesheet" type="text/css" href="./css/font-nord.css" />
+    <link rel="stylesheet" type="text/css" href="./css/bg-nord.css" />
+    <link rel="stylesheet" type="text/css" href="./css/font-open-color.css" />
+    <link rel="stylesheet" type="text/css" href="./css/bg-open-color.css" />
+    <link rel="stylesheet" type="text/css" href="./css/material-icons.css" />
+    <link rel="stylesheet" type="text/css" href="./css/abs-layout.css" />
+    <link rel="stylesheet" type="text/css" href="./css/border-layout.css" />
+    <link rel="stylesheet" type="text/css" href="./css/text-rect.css" />
+    <link rel="stylesheet" type="text/css" href="./css/text-circle.css" />
+    <link rel="stylesheet" type="text/css" href="./css/card.css" />
+    <link rel="stylesheet" type="text/css" href="./css/lines.css" />
+    <link rel="stylesheet" type="text/css" href="./css/filters.css" />
+    <link rel="stylesheet" type="text/css" href="./fonts/remixicon.css" />
+    <link rel="stylesheet" type="text/css" href="./css/style.css" />
+    <style>
+      /* 加载状态样式 */
+      #loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #2e3440;
+        color: #d8dee9;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      }
+      #loading.hidden {
+        display: none;
+      }
+      #loading-spinner {
+        width: 50px;
+        height: 50px;
+        border: 3px solid #4c566a;
+        border-top-color: #88c0d0;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      #loading-text {
+        font-size: 16px;
+        color: #88c0d0;
+      }
+      #loading-progress {
+        font-size: 14px;
+        color: #81a1c1;
+        margin-top: 10px;
+      }
+      #loading-error {
+        color: #bf616a;
+        margin-top: 20px;
+        max-width: 600px;
+        text-align: center;
+        padding: 0 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 加载状态显示 -->
+    <div id="loading">
+      <div id="loading-spinner"></div>
+      <div id="loading-text">正在加载幻灯片...</div>
+      <div id="loading-progress"></div>
+      <div id="loading-error"></div>
+    </div>
+
+    <!-- 幻灯片内容容器 -->
+    <textarea id="source"></textarea>
+
+    <script src="js/remark.min.js"></script>
+    <script src="js/vue.js"></script>
+    <script src="js/quasar.umd.min.js"></script>
+    <script src="js/mermaid.min.js"></script>
+    <script>
+      // MathJax 配置 - 必须在加载 MathJax 之前定义
+      MathJax = {
+        loader: {
+          load: ["input/tex-base", "[tex]/newcommand", "output/chtml"],
+        },
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+        },
+        options: {
+          skipHtmlTags: [
+            "script",
+            "noscript",
+            "style",
+            "textarea",
+            "pre",
+            "code",
+            "annotation",
+            "annotation-xml",
+          ],
+          ignoreHtmlClass: "tex2jax_ignore",
+        },
+      };
+    </script>
+    <script id="MathJax-script" async src="js/tex-mml-chtml.js"></script>
+    <script src="js/pangu.js"></script>
+    <script>
+      // ============================================
+      // 幻灯片配置文件 - 在这里定义要加载的页面
+      // ============================================
+      const SLIDES_CONFIG = {
+        // 要加载的幻灯片文件列表（按顺序加载）
+        // 从 index2.html 拆分的 56 个页面 (00.md - 55.md)
+        slides: Array.from({length: 56}, (_, i) => `slides/${String(i).padStart(2, '0')}.md`)
+      };
+
+      // 加载单个文件
+      async function loadFile(url) {
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+          return await response.text();
+        } catch (error) {
+          console.error(`加载文件失败: ${url}`, error);
+          throw error;
+        }
+      }
+
+      // 加载所有幻灯片文件
+      async function loadAllSlides() {
+        const loadingEl = document.getElementById('loading');
+        const progressEl = document.getElementById('loading-progress');
+        const errorEl = document.getElementById('loading-error');
+        const sourceEl = document.getElementById('source');
+
+        try {
+          const contents = [];
+          const total = SLIDES_CONFIG.slides.length;
+
+          for (let i = 0; i < total; i++) {
+            const file = SLIDES_CONFIG.slides[i];
+            progressEl.textContent = `(${i + 1}/${total}) ${file}`;
+            
+            try {
+              const content = await loadFile(file);
+              contents.push(content);
+            } catch (error) {
+              // 如果文件不存在，添加一个错误提示页
+              contents.push(`\n---\n\n## ⚠️ 加载失败\n\n文件 \`${file}\` 加载失败\n\n错误信息: ${error.message}\n`);
+            }
+          }
+
+          // 合并所有内容：全局模板 + 各文件内容
+          const globalTemplate = `layout: true
+class: typo, typo-selection
+
+---`;
+          
+          // 简单处理：trim每个文件，确保文件之间用 --- 分隔
+          // 注意：保留文件内部的 ---，只处理文件之间的连接
+          let fullContent = globalTemplate;
+          for (let i = 0; i < contents.length; i++) {
+            let content = contents[i].trim();
+            
+            // 如果文件以 --- 开头，去掉它（因为前面已经添加了）
+            if (content.startsWith('---')) {
+              content = content.substring(3).trimStart();
+            }
+            
+            // 如果文件以 --- 结尾，也去掉它（我们会在连接时添加）
+            if (content.endsWith('---')) {
+              content = content.substring(0, content.length - 3).trimEnd();
+            }
+            
+            // 用 --- 连接
+            fullContent += '\n\n---\n\n' + content;
+          }
+          
+          // 预处理：去掉每行开头的空格（需要先处理再设置到textarea）
+          let processedContent = fullContent.replace(
+            /```[^`]+```/gm,
+            (match) => match.replace(/[ ]/gm, "\u3000")
+          );
+          var lines = processedContent.split("\n");
+          processedContent = lines
+            .map((line) => line.replace(/^(?![ ]+[\-|0-9])[ ]+/, ""))
+            .map((line) => line.replace(/\u3000/g, " "))
+            .join("\n");
+          
+          sourceEl.textContent = processedContent;
+
+          // 隐藏加载界面
+          loadingEl.classList.add('hidden');
+
+          // 初始化 remark
+          initRemark();
+
+        } catch (error) {
+          errorEl.textContent = `加载失败: ${error.message}`;
+          console.error('加载幻灯片失败:', error);
+        }
+      }
+
+      // 初始化 remarkjs
+      function initRemark() {
+        var slideshow = remark.create({
+          ratio: "4:3",
+          highlightStyle: "github",
+          highlightLines: true,
+          countIncrementalSlides: false,
+          navigation: {
+            scroll: false,
+            touch: true,
+            click: false,
+          },
+        });
+
+        // 初始化 VUE
+        for (var el of document.querySelectorAll(".vue")) {
+          new Vue({
+            el: el,
+          });
+        }
+
+        // 初始化可点击预览的卡片
+        var preview_win_cards = document.querySelectorAll(".preview-win");
+        for (var card of preview_win_cards) {
+          ((clickedCard) => {
+            clickedCard.addEventListener("click", (e) => {
+              var img = clickedCard.querySelector("img");
+              if (img) {
+                window.open(img.src);
+              }
+            });
+          })(card);
+        }
+
+        // 背景色变化兼容 F11 全屏
+        function isFullScreen() {
+          return (
+            window.fullScreen ||
+            (window.innerWidth == screen.width &&
+              window.innerHeight == screen.height)
+          );
+        }
+
+        window.addEventListener("resize", () => {
+          if (isFullScreen()) {
+            document.body.style["background-color"] = "#000";
+          } else {
+            document.body.style["background-color"] = "#d7d8d2";
+          }
+        });
+
+        // 初始化 mermaid
+        mermaid.mermaidAPI.initialize({
+          startOnLoad: false,
+          theme: "forest",
+          themeCSS:
+            ".tick>text { font-size:26px; }  .taskTextOutsideRight,.taskTextOutsideLeft { font-size:20px; } .titleText {font-size:30px;} .sectionTitle {font-size:20px;}",
+          gantt: {
+            fontSize: 26,
+            barHeight: 30,
+            useMaxWidth: false,
+          },
+        });
+
+        var mermaidCmps = document.querySelectorAll(".mermaid");
+        for (var i = 0; i < mermaidCmps.length; i++) {
+          (function(mermaidCmp) {
+            var insertSvg = function (svgCode, bindFunctions) {
+              mermaidCmp.innerHTML = svgCode;
+            };
+            var graphDefinition = mermaidCmp.innerText;
+            var id = "mermaid-" + i;
+            try {
+              mermaid.mermaidAPI.render(id, graphDefinition, insertSvg, mermaidCmp);
+            } catch (e) {
+              console.error(e);
+            }
+          })(mermaidCmps[i]);
+        }
+
+        // 初始化 pangu.js
+        var panguSlides = document.querySelectorAll('.pangujs');
+        for (var slide of panguSlides) {
+          pangu.spacingElementByClassName('pangujs');
+        }
+
+        // 初始化 MathJax 公式渲染
+        if (typeof MathJax !== 'undefined' && MathJax.typeset) {
+          MathJax.typeset();
+        }
+      }
+
+      // 启动加载
+      loadAllSlides();
+    </script>
+  </body>
+</html>

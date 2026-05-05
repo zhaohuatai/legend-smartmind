@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Markdown PPT Editor</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="./fonts/remixicon.css" />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html, body {
+        height: 100%;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: #f5f7fa;
+      }
+
+      .app-container {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+      }
+
+      /* 左侧资料列表 */
+      .sidebar {
+        width: 220px;
+        min-width: 220px;
+        background: #fff;
+        border-right: 1px solid #e8e8e8;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .sidebar-header {
+        padding: 14px 16px;
+        border-bottom: 1px solid #e8e8e8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .sidebar-header h3 {
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
+      }
+
+      .sidebar-header .add-btn {
+        width: 24px;
+        height: 24px;
+        border: none;
+        background: #1890ff;
+        color: #fff;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
+
+      .doc-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 8px 0;
+      }
+
+      .doc-item {
+        padding: 10px 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: background 0.2s;
+      }
+
+      .doc-item:hover {
+        background: #f5f5f5;
+      }
+
+      .doc-item.active {
+        background: #e6f7ff;
+      }
+
+      .doc-item .doc-icon {
+        width: 20px;
+        height: 20px;
+        color: #1890ff;
+        flex-shrink: 0;
+      }
+
+      .doc-item .doc-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .doc-item .doc-title {
+        font-size: 13px;
+        color: #333;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .doc-item .doc-subtitle {
+        font-size: 11px;
+        color: #999;
+        margin-top: 2px;
+      }
+
+      /* 中间编辑区 */
+      .editor-area {
+        width: 35%;
+        min-width: 350px;
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border-right: 1px solid #e8e8e8;
+      }
+
+      .editor-toolbar {
+        padding: 10px 16px;
+        border-bottom: 1px solid #e8e8e8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #fafafa;
+      }
+
+      .editor-toolbar .toolbar-title {
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .editor-toolbar .toolbar-title i {
+        color: #1890ff;
+      }
+
+      .toolbar-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .toolbar-actions button {
+        padding: 5px 12px;
+        border: 1px solid #d9d9d9;
+        background: #fff;
+        color: #666;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.2s;
+      }
+
+      .toolbar-actions button:hover {
+        border-color: #1890ff;
+        color: #1890ff;
+      }
+
+      .toolbar-actions button.primary {
+        background: #1890ff;
+        border-color: #1890ff;
+        color: #fff;
+      }
+
+      .toolbar-actions button.primary:hover {
+        background: #40a9ff;
+        border-color: #40a9ff;
+      }
+
+      .config-bar {
+        padding: 8px 16px;
+        background: #fafafa;
+        border-bottom: 1px solid #e8e8e8;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .config-item {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .config-item label {
+        color: #888;
+        font-size: 11px;
+        white-space: nowrap;
+      }
+
+      .config-item select {
+        padding: 2px 6px;
+        font-size: 11px;
+        border: 1px solid #d9d9d9;
+        border-radius: 3px;
+        background: #fff;
+        color: #333;
+        cursor: pointer;
+      }
+
+      .config-item select:focus {
+        outline: none;
+        border-color: #1890ff;
+      }
+
+      #markdown-editor {
+        flex: 1;
+        width: 100%;
+        padding: 16px;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 13px;
+        line-height: 1.7;
+        border: none;
+        outline: none;
+        resize: none;
+        background: #fff;
+        color: #333;
+        overflow-y: auto;
+      }
+
+      /* 右侧预览区 */
+      .preview-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        background: #f0f2f5;
+        min-width: 0;
+      }
+
+      .preview-toolbar {
+        padding: 10px 16px;
+        border-bottom: 1px solid #e8e8e8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #fafafa;
+      }
+
+      .preview-toolbar .toolbar-title {
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .preview-toolbar .toolbar-title i {
+        color: #1890ff;
+      }
+
+      .preview-toolbar .toolbar-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .preview-content {
+        flex: 1;
+        overflow: hidden;
+        background: #e8e8e8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .preview-content iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: #fff;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      /* 滚动条样式 */
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #d9d9d9;
+        border-radius: 3px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #bfbfbf;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- 左侧资料列表 -->
+      <div class="sidebar">
+        <div class="sidebar-header">
+          <h3>资料列表</h3>
+          <button class="add-btn" title="新建">+</button>
+        </div>
+        <div class="doc-list" id="doc-list">
+          <div class="doc-item active" data-index="0">
+            <i class="ri-file-text-line doc-icon"></i>
+            <div class="doc-info">
+              <div class="doc-title">1.1 集合的概念</div>
+              <div class="doc-subtitle">课件</div>
+            </div>
+          </div>
+          <div class="doc-item" data-index="1">
+            <i class="ri-file-text-line doc-icon"></i>
+            <div class="doc-info">
+              <div class="doc-title">1.2 集合间的基本关系</div>
+              <div class="doc-subtitle">课件</div>
+            </div>
+          </div>
+          <div class="doc-item" data-index="2">
+            <i class="ri-file-text-line doc-icon"></i>
+            <div class="doc-info">
+              <div class="doc-title">1.3 集合的基本运算</div>
+              <div class="doc-subtitle">习题</div>
+            </div>
+          </div>
+          <div class="doc-item" data-index="3">
+            <i class="ri-file-text-line doc-icon"></i>
+            <div class="doc-info">
+              <div class="doc-title">第一章 单元测试卷</div>
+              <div class="doc-subtitle">测试</div>
+            </div>
+          </div>
+          <div class="doc-item" data-index="4">
+            <i class="ri-file-text-line doc-icon"></i>
+            <div class="doc-info">
+              <div class="doc-title">集合与函数 教学设计</div>
+              <div class="doc-subtitle">教案</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 中间编辑区 -->
+      <div class="editor-area">
+        <div class="editor-toolbar">
+          <span class="toolbar-title"><i class="ri-markdown-line"></i> Markdown 编辑</span>
+          <div class="toolbar-actions">
+            <button id="btn-preview"><i class="ri-eye-line"></i> 预览</button>
+            <button id="btn-sync" class="primary"><i class="ri-refresh-line"></i> 同步</button>
+          </div>
+        </div>
+        <div class="config-bar">
+          <div class="config-item">
+            <label>layout:</label>
+            <select id="cfg-layout">
+              <option value="true">true</option>
+              <option value="">不设置</option>
+            </select>
+          </div>
+          <div class="config-item">
+            <label>class:</label>
+            <select id="cfg-class">
+              <option value="typo, typo-selection">typo, typo-selection</option>
+              <option value="typo">typo</option>
+              <option value="center, middle">center, middle</option>
+              <option value="nord-dark, center, middle">nord-dark</option>
+              <option value="nord-light, center, middle">nord-light</option>
+              <option value="pangujs">pangujs</option>
+              <option value="">不设置</option>
+            </select>
+          </div>
+          <div class="config-item">
+            <label>count:</label>
+            <select id="cfg-count">
+              <option value="">不设置</option>
+              <option value="false">false</option>
+            </select>
+          </div>
+          <div class="config-item">
+            <label>ratio:</label>
+            <select id="cfg-ratio">
+              <option value="4:3">4:3</option>
+              <option value="16:9">16:9</option>
+            </select>
+          </div>
+          <div class="config-item">
+            <label>highlight:</label>
+            <select id="cfg-highlight">
+              <option value="github">github</option>
+              <option value="default">default</option>
+              <option value="monokai">monokai</option>
+              <option value="solarized-dark">solarized-dark</option>
+              <option value="solarized-light">solarized-light</option>
+              <option value="tomorrow">tomorrow</option>
+              <option value="tomorrow-night">tomorrow-night</option>
+              <option value="zenburn">zenburn</option>
+            </select>
+          </div>
+        </div>
+        <textarea id="markdown-editor" placeholder="在此输入Markdown内容..."></textarea>
+      </div>
+
+      <!-- 右侧预览区 -->
+      <div class="preview-area">
+        <div class="preview-toolbar">
+          <span class="toolbar-title"><i class="ri-slideshow-line"></i> PPT 预览</span>
+          <div class="toolbar-actions">
+            <button id="btn-fullscreen" title="全屏"><i class="ri-fullscreen-line"></i></button>
+            <button id="btn-reload" title="刷新"><i class="ri-refresh-line"></i></button>
+          </div>
+        </div>
+        <div class="preview-content">
+          <iframe id="preview-iframe" src="index4.html"></iframe>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      var iframe = document.getElementById('preview-iframe');
+      var editor = document.getElementById('markdown-editor');
+      var btnSync = document.getElementById('btn-sync');
+      var btnReload = document.getElementById('btn-reload');
+      var btnFullscreen = document.getElementById('btn-fullscreen');
+      var docItems = document.querySelectorAll('.doc-item');
+
+      var slideContents = [];
+      var currentDocIndex = 0;
+
+      function getConfigValues() {
+        return {
+          layout: document.getElementById('cfg-layout').value,
+          class: document.getElementById('cfg-class').value,
+          count: document.getElementById('cfg-count').value,
+          ratio: document.getElementById('cfg-ratio').value,
+          highlightStyle: document.getElementById('cfg-highlight').value
+        };
+      }
+
+      function buildMarkdownWithConfig(content, config) {
+        var lines = [];
+        if (config.layout) {
+          lines.push('layout: ' + config.layout);
+        }
+        if (config.class) {
+          lines.push('class: ' + config.class);
+        }
+        lines.push('');
+        lines.push('---');
+        lines.push('');
+        lines.push(content);
+        return lines.join('\n');
+      }
+
+      function loadSlides() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'js/data-loader.js', false);
+        xhr.send();
+
+        var scriptContent = xhr.responseText;
+        var match = scriptContent.match(/slides:\s*\[([^\]]+)\]/);
+        if (match) {
+          var slideFiles = match[1].match(/'([^']+)'/g);
+          if (slideFiles) {
+            slideFiles.forEach(function(file) {
+              var fileName = file.replace(/'/g, '');
+              var slideXhr = new XMLHttpRequest();
+              slideXhr.open('GET', fileName, false);
+              slideXhr.send();
+              slideContents.push(slideXhr.responseText);
+            });
+          }
+        }
+
+        if (slideContents.length > 0) {
+          editor.value = slideContents[0];
+        }
+      }
+
+      function syncToIframe() {
+        var content = editor.value;
+        var config = getConfigValues();
+        var fullContent = buildMarkdownWithConfig(content, config);
+
+        if (iframe.contentWindow) {
+          iframe.contentWindow.postMessage({
+            type: 'UPDATE_MARKDOWN',
+            content: fullContent,
+            config: config
+          }, '*');
+        }
+      }
+
+      docItems.forEach(function(item) {
+        item.addEventListener('click', function() {
+          docItems.forEach(function(i) { i.classList.remove('active'); });
+          this.classList.add('active');
+          currentDocIndex = parseInt(this.dataset.index);
+          if (slideContents[currentDocIndex]) {
+            editor.value = slideContents[currentDocIndex];
+            syncToIframe();
+          }
+        });
+      });
+
+      btnSync.addEventListener('click', function() {
+        syncToIframe();
+      });
+
+      btnReload.addEventListener('click', function() {
+        iframe.src = 'index4.html';
+      });
+
+      btnFullscreen.addEventListener('click', function() {
+        if (iframe.requestFullscreen) {
+          iframe.requestFullscreen();
+        } else if (iframe.webkitRequestFullscreen) {
+          iframe.webkitRequestFullscreen();
+        }
+      });
+
+      window.addEventListener('message', function(e) {
+        if (e.data && e.data.type === 'IFRAME_READY') {
+          syncToIframe();
+        }
+      });
+
+      loadSlides();
+
+      setTimeout(function() {
+        syncToIframe();
+      }, 1000);
+    </script>
+  </body>
+</html>

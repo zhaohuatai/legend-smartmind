@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>幻灯片预览</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/quasar.min.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/pure-min.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/spaces.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/typo.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/devices.min.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/gh-fork-ribbon.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/nord-dark.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/nord-light.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/font-nord.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/bg-nord.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/font-open-color.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/bg-open-color.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/material-icons.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/abs-layout.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/border-layout.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/text-rect.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/text-circle.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/card.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/lines.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/filters.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/fonts/remixicon.css" />
+    <link rel="stylesheet" type="text/css" href="/remark-it/css/style.css" />
+    <style>
+      html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+      body { background-color: #1a1a1a; }
+      .remark-container { height: 100vh; }
+    </style>
+    <script src="/remark-it/js/slide-loader.js"></script>
+  </head>
+  <body>
+    <textarea id="source"></textarea>
+
+    <script src="/remark-it/js/remark.min.js"></script>
+    <script src="/remark-it/js/vue.js"></script>
+    <script src="/remark-it/js/quasar.umd.min.js"></script>
+    <script src="/remark-it/js/mermaid.min.js"></script>
+    <script id="MathJax-script" async src="/remark-it/js/tex-mml-chtml.js"></script>
+    <script src="/remark-it/js/pangu.js"></script>
+
+    <script>
+      let slideshow = null;
+      let currentRatio = '4:3';
+      let isDarkTheme = true;
+
+      // 初始化幻灯片
+      function initSlideshow(markdownContent) {
+        const targetTextArea = document.getElementById("source");
+        if (!targetTextArea) {
+          console.error('Cannot find textarea#source');
+          return;
+        }
+
+        // 销毁旧的幻灯片
+        if (slideshow) {
+          try {
+            const containers = document.querySelectorAll('.remark-container');
+            containers.forEach(el => el.remove());
+          } catch (e) {
+            console.warn('Error removing old containers:', e);
+          }
+          slideshow = null;
+        }
+
+        // 如果有传入内容，使用传入的；否则尝试加载所有幻灯片
+        let content = markdownContent || '';
+        if (!content && typeof loadAllSlidesSync === 'function') {
+          try {
+            loadAllSlidesSync();
+            content = targetTextArea.value || targetTextArea.innerHTML || '';
+          } catch (e) {
+            console.warn('loadAllSlidesSync failed:', e);
+          }
+        }
+
+        // 预处理：去掉每行开头的空格，否则超过2层缩进的类会导致解析出BUG
+        let targetText = content;
+        if (targetText) {
+          targetText = targetText.replace(
+            /```[^`]+```/gm,
+            (match) => match.replace(/[ ]/gm, "\u3000")
+          );
+          const lines = targetText.split("\n");
+          targetText = lines
+            .map((line) => line.replace(/^(?![ ]+[\-|0-9])[ ]+/, ""))
+            .map((line) => line.replace(/\u3000/g, " "))
+            .join("\n");
+        }
+        
+        targetTextArea.value = targetText || '';
+
+        // 创建新的幻灯片
+        try {
+          slideshow = remark.create({
+            ratio: currentRatio,
+            highlightStyle: "github",
+            highlightLines: true,
+            countIncrementalSlides: false,
+            navigation: {
+              scroll: false,
+              touch: true,
+              click: false,
+            },
+          });
+        } catch (e) {
+          console.error('remark.create failed:', e);
+          return;
+        }
+
+        // 初始化 VUE
+        for (const el of document.querySelectorAll(".vue")) {
+          new Vue({ el: el });
+        }
+
+        // 初始化可点击预览的卡片
+        const previewWinCards = document.querySelectorAll(".preview-win");
+        for (const card of previewWinCards) {
+          ((clickedCard) => {
+            clickedCard.addEventListener("click", (e) => {
+              const img = clickedCard.querySelector("img");
+              if (img) {
+                window.open(img.src);
+              }
+            });
+          })(card);
+        }
+
+        // 初始化 mermaid
+        initMermaid();
+
+        // pangu.js
+        pangu.spacingElementByClassName('pangujs');
+
+        // 通知父窗口幻灯片数量和当前页
+        setTimeout(() => {
+          const slides = document.querySelectorAll('.remark-slide');
+          window.parent.postMessage({
+            type: 'SLIDE_COUNT',
+            count: slides.length
+          }, '*');
+        }, 100);
+      }
+
+      // 初始化 mermaid
+      function initMermaid() {
+        mermaid.mermaidAPI.initialize({
+          startOnLoad: false,
+          theme: "forest",
+          themeCSS: ".tick>text { font-size:26px; }  .taskTextOutsideRight,.taskTextOutsideLeft { font-size:20px; } .titleText {font-size:30px;} .sectionTitle {font-size:20px;}",
+          gantt: {
+            fontSize: 26,
+            barHeight: 30,
+            useMaxWidth: false,
+          },
+        });
+
+        const mermaidCmps = document.querySelectorAll(".mermaid");
+        for (let i = 0; i < mermaidCmps.length; i++) {
+          const mermaidCmp = mermaidCmps[i];
+          const insertSvg = function (svgCode) {
+            mermaidCmp.innerHTML = svgCode;
+          };
+
+          let graphDefinition = "";
+          const pCmps = mermaidCmp.querySelectorAll("pre");
+          for (const pCmp of pCmps) {
+            graphDefinition += pCmp.textContent.replace(/\\n/g, "<br/>");
+          }
+
+          mermaid.mermaidAPI.render("graphDiv" + i, graphDefinition, insertSvg);
+        }
+      }
+
+      // LaTeX 配置
+      window.MathJax = {
+        loader: {
+          load: ["input/tex-base", "[tex]/newcommand", "output/chtml"],
+        },
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+        },
+        options: {
+          skipHtmlTags: [
+            "script",
+            "noscript",
+            "style",
+            "textarea",
+            "pre",
+            "code",
+            "annotation",
+            "annotation-xml",
+          ],
+          ignoreHtmlClass: "tex2jax_ignore",
+        },
+      };
+
+      // 背景色变化兼容 F11 全屏
+      function isFullScreen() {
+        return (
+          window.fullScreen ||
+          (window.innerWidth == screen.width && window.innerHeight == screen.height)
+        );
+      }
+
+      window.addEventListener("resize", () => {
+        if (isFullScreen()) {
+          document.body.style["background-color"] = "#000";
+        } else {
+          document.body.style["background-color"] = "#1a1a1a";
+        }
+      });
+
+      // 监听父窗口消息
+      window.addEventListener('message', (event) => {
+        console.log('Iframe received message:', event.data);
+
+        switch (event.data.type) {
+          case 'UPDATE_CONTENT':
+            const content = event.data.content || '';
+            if (content.trim()) {
+              // 延迟执行确保 DOM 已准备好
+              setTimeout(() => initSlideshow(content), 0);
+            }
+            break;
+
+          case 'SET_RATIO':
+            currentRatio = event.data.ratio || '4:3';
+            if (event.data.content) {
+              setTimeout(() => initSlideshow(event.data.content), 0);
+            }
+            break;
+
+          case 'PREV_SLIDE':
+            if (slideshow) {
+              slideshow.gotoPreviousSlide();
+            }
+            break;
+
+          case 'NEXT_SLIDE':
+            if (slideshow) {
+              slideshow.gotoNextSlide();
+            }
+            break;
+
+          case 'TOGGLE_THEME':
+            isDarkTheme = event.data.isDark;
+            const slides = document.querySelectorAll('.remark-slide-content');
+            slides.forEach((slide) => {
+              if (isDarkTheme) {
+                slide.classList.add('nord-dark');
+                slide.classList.remove('nord-light');
+              } else {
+                slide.classList.add('nord-light');
+                slide.classList.remove('nord-dark');
+              }
+            });
+            break;
+
+          case 'GET_SLIDE_COUNT':
+            const slideElements = document.querySelectorAll('.remark-slide');
+            window.parent.postMessage({
+              type: 'SLIDE_COUNT',
+              count: slideElements.length
+            }, '*');
+            break;
+        }
+      });
+
+      // 监听幻灯片变化，通知父窗口
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+          setTimeout(() => {
+            const currentSlideEl = document.querySelector('.remark-visible');
+            if (currentSlideEl) {
+              const slides = Array.from(document.querySelectorAll('.remark-slide'));
+              const index = slides.indexOf(currentSlideEl) + 1;
+              window.parent.postMessage({
+                type: 'CURRENT_SLIDE',
+                current: index
+              }, '*');
+            }
+          }, 50);
+        }
+      });
+
+      // 等待 DOM 和脚本加载完成后再通知父窗口
+      function notifyReady() {
+        if (document.getElementById('source') && typeof remark !== 'undefined') {
+          window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
+          console.log('Iframe ready, waiting for content...');
+        } else {
+          setTimeout(notifyReady, 50);
+        }
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', notifyReady);
+      } else {
+        notifyReady();
+      }
+    </script>
+  </body>
+</html>

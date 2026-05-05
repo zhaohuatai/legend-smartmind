@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Markdown PPT Editor</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width"
+    />
+    <link rel="stylesheet" type="text/css" href="./css/quasar.min.css" />
+    <link rel="stylesheet" type="text/css" href="./css/pure-min.css" />
+    <link rel="stylesheet" type="text/css" href="./css/spaces.css" />
+    <link rel="stylesheet" type="text/css" href="./css/typo.css" />
+    <link rel="stylesheet" type="text/css" href="./css/devices.min.css" />
+    <link rel="stylesheet" type="text/css" href="./css/gh-fork-ribbon.css" />
+    <link rel="stylesheet" type="text/css" href="./css/nord-dark.css" />
+    <link rel="stylesheet" type="text/css" href="./css/nord-light.css" />
+    <link rel="stylesheet" type="text/css" href="./css/font-nord.css" />
+    <link rel="stylesheet" type="text/css" href="./css/bg-nord.css" />
+    <link rel="stylesheet" type="text/css" href="./css/font-open-color.css" />
+    <link rel="stylesheet" type="text/css" href="./css/bg-open-color.css" />
+    <link rel="stylesheet" type="text/css" href="./css/material-icons.css" />
+    <link rel="stylesheet" type="text/css" href="./css/abs-layout.css" />
+    <link rel="stylesheet" type="text/css" href="./css/border-layout.css" />
+    <link rel="stylesheet" type="text/css" href="./css/text-rect.css" />
+    <link rel="stylesheet" type="text/css" href="./css/text-circle.css" />
+    <link rel="stylesheet" type="text/css" href="./css/card.css" />
+    <link rel="stylesheet" type="text/css" href="./css/lines.css" />
+    <link rel="stylesheet" type="text/css" href="./css/filters.css" />
+    <link rel="stylesheet" type="text/css" href="./fonts/remixicon.css" />
+    <link rel="stylesheet" type="text/css" href="./css/style.css" />
+    <script src="js/data-loader.js?v=6"></script>
+    <script>
+      MathJax = {
+        loader: {
+          load: ["input/tex-base", "[tex]/newcommand", "output/chtml"],
+        },
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+        },
+        options: {
+          skipHtmlTags: [
+            "script",
+            "noscript",
+            "style",
+            "textarea",
+            "pre",
+            "code",
+            "annotation",
+            "annotation-xml",
+          ],
+          ignoreHtmlClass: "tex2jax_ignore",
+        },
+      };
+    </script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html, body {
+        height: 100%;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+      }
+
+      .container {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+      }
+
+      .editor-panel {
+        width: 40%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border-right: 2px solid #ccc;
+        background: #f5f5f5;
+      }
+
+      .editor-header {
+        padding: 10px 15px;
+        background: #2c3e50;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .editor-header .config-bar {
+        display: none;
+      }
+
+      body.iframe-mode .editor-header {
+        display: none;
+      }
+
+      body.iframe-mode .config-bar {
+        display: none;
+      }
+
+      body.iframe-mode .editor-panel {
+        display: none;
+      }
+
+      body.iframe-mode .preview-panel {
+        width: 100%;
+      }
+
+      .editor-header button {
+        padding: 5px 15px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .editor-header button:hover {
+        background: #2980b9;
+      }
+
+      .config-bar {
+        padding: 8px 15px;
+        background: #34495e;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .config-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      .config-item label {
+        color: #ecf0f1;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .config-item select {
+        padding: 3px 8px !important;
+        font-size: 12px !important;
+        border: 1px solid #7f8c8d !important;
+        border-radius: 3px !important;
+        background: #ecf0f1 !important;
+        color: #2c3e50 !important;
+        cursor: pointer !important;
+        z-index: 9999 !important;
+        position: relative !important;
+      }
+
+      .config-item select option {
+        background: #ecf0f1 !important;
+        color: #2c3e50 !important;
+      }
+
+      .config-item select:focus {
+        outline: none !important;
+        border-color: #3498db !important;
+      }
+
+      #markdown-editor {
+        flex: 1;
+        width: 100%;
+        padding: 15px;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 14px;
+        line-height: 1.6;
+        border: none;
+        outline: none;
+        resize: none;
+        background: #fafafa;
+        color: #333;
+        overflow-y: auto;
+      }
+
+      .preview-panel {
+        width: 60%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background: #d7d8d2;
+      }
+
+      .preview-header {
+        padding: 10px 15px;
+        background: #2c3e50;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .preview-content {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+        background: #d7d8d2;
+      }
+
+      #remark-container {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        color: #666;
+        z-index: 1000;
+      }
+
+      .loading-overlay.hidden {
+        display: none;
+      }
+
+      #source {
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="editor-panel">
+        <div class="editor-header">
+          <span>Markdown 编辑器</span>
+          <button id="btn-load-slides">加载幻灯片</button>
+        </div>
+        <div class="config-bar">
+          <div class="config-item">
+            <label>layout:</label>
+            <select id="cfg-layout">
+              <option value="true">true (启用模板)</option>
+              <option value="">不设置</option>
+            </select>
+          </div>
+          <div class="config-item">
+            <label>class:</label>
+            <select id="cfg-class">
+              <option value="typo, typo-selection">typo, typo-selection (默认排版)</option>
+              <option value="typo">typo (基础排版)</option>
+              <option value="center, middle">center, middle (居中)</option>
+              <option value="nord-dark, center, middle">nord-dark 深色主题</option>
+              <option value="nord-light, center, middle">nord-light 浅色主题</option>
+              <option value="pangujs">pangujs (中英文混排)</option>
+              <option value="">不设置</option>
+            </select>
+          </div>
+          <div class="config-item">
+            <label>count:</label>
+            <select id="cfg-count">
+              <option value="">不设置 (默认显示)</option>
+              <option value="false">false (隐藏页码)</option>
+            </select>
+          </div>
+          <div class="config-item">
+            <label>ratio:</label>
+            <select id="cfg-ratio">
+              <option value="4:3">4:3 (默认)</option>
+              <option value="16:9">16:9 (宽屏)</option>
+            </select>
+          </div>
+          <div class="config-item">
+            <label>highlightStyle:</label>
+            <select id="cfg-highlight">
+              <option value="github">github</option>
+              <option value="default">default</option>
+              <option value="monokai">monokai</option>
+              <option value="solarized-dark">solarized-dark</option>
+              <option value="solarized-light">solarized-light</option>
+              <option value="tomorrow">tomorrow</option>
+              <option value="tomorrow-night">tomorrow-night</option>
+              <option value="zenburn">zenburn</option>
+            </select>
+          </div>
+        </div>
+        <textarea id="markdown-editor" placeholder="在此输入Markdown内容..."></textarea>
+      </div>
+
+      <div class="preview-panel">
+        <div class="preview-header">PPT 演示区域</div>
+        <div class="preview-content" id="preview-content">
+          <div class="loading-overlay" id="loading-overlay">加载中...</div>
+          <div id="remark-container"></div>
+        </div>
+      </div>
+    </div>
+
+    <textarea id="source" style="display:none;"></textarea>
+
+    <script src="js/remark.min.js"></script>
+    <script src="js/vue.js"></script>
+    <script src="js/quasar.umd.min.js"></script>
+    <script src="js/mermaid.min.js"></script>
+    <script id="MathJax-script" async src="js/tex-mml-chtml.js"></script>
+    <script src="js/pangu.js"></script>
+
+    <script>
+      var slideshow = null;
+      var updateTimer = null;
+      var isConfigUpdating = false;
+      var vueInstances = [];
+      var mathJaxTimer = null;
+      var mermaidRenderId = 0;
+      var lastContentHash = '';
+
+      function getConfigSelectValues() {
+        return {
+          layout: document.getElementById('cfg-layout').value,
+          class: document.getElementById('cfg-class').value,
+          count: document.getElementById('cfg-count').value,
+          ratio: document.getElementById('cfg-ratio').value,
+          highlightStyle: document.getElementById('cfg-highlight').value
+        };
+      }
+
+      function setConfigSelectValues(config) {
+        document.getElementById('cfg-layout').value = config.layout || '';
+        document.getElementById('cfg-class').value = config.class || '';
+        document.getElementById('cfg-count').value = config.count || '';
+        document.getElementById('cfg-ratio').value = config.ratio || '4:3';
+        document.getElementById('cfg-highlight').value = config.highlightStyle || 'github';
+      }
+
+      function buildGlobalConfigHeader(config) {
+        var lines = [];
+        if (config.layout) {
+          lines.push('layout: ' + config.layout);
+        }
+        if (config.class) {
+          lines.push('class: ' + config.class);
+        }
+        lines.push('');
+        lines.push('---');
+        lines.push('');
+        return lines.join('\n');
+      }
+
+      function parseGlobalConfigHeader(text) {
+        var lines = text.split('\n');
+        var configLines = [];
+        var bodyStartIndex = 0;
+        var foundSeparator = false;
+
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines[i].trim();
+          if (line === '---') {
+            bodyStartIndex = i + 1;
+            foundSeparator = true;
+            break;
+          }
+          configLines.push(lines[i]);
+        }
+
+        var config = { layout: '', class: '' };
+        for (var j = 0; j < configLines.length; j++) {
+          var cl = configLines[j].trim();
+          if (cl.indexOf('layout:') === 0) {
+            config.layout = cl.replace('layout:', '').trim();
+          } else if (cl.indexOf('class:') === 0) {
+            config.class = cl.replace('class:', '').trim();
+          }
+        }
+
+        var body = foundSeparator ? lines.slice(bodyStartIndex).join('\n') : text;
+        return { config: config, body: body };
+      }
+
+      function preprocessMarkdown(text) {
+        var targetText = text.replace(
+          /```[^`]+```/gm,
+          function(match) {
+            return match.replace(/[ ]/gm, "\u3000");
+          }
+        );
+        var lines = targetText.split("\n");
+        return lines
+          .map(function(line) {
+            return line.replace(/^(?![ ]+[\-|0-9])[ ]+/, "");
+          })
+          .map(function(line) {
+            return line.replace(/\u3000/g, " ");
+          })
+          .join("\n");
+      }
+
+      function updateEditorHeader() {
+        var editor = document.getElementById('markdown-editor');
+        var currentContent = editor.value;
+        var parsed = parseGlobalConfigHeader(currentContent);
+        var config = getConfigSelectValues();
+        var header = buildGlobalConfigHeader(config);
+        editor.value = header + parsed.body;
+      }
+
+      function initRemarkSlideShow(content) {
+        var sourceEl = document.getElementById("source");
+        var processedContent = preprocessMarkdown(content);
+        sourceEl.value = processedContent;
+
+        var config = getConfigSelectValues();
+        var remarkContainer = document.getElementById("remark-container");
+
+        slideshow = remark.create({
+          source: processedContent,
+          container: remarkContainer,
+          ratio: config.ratio,
+          highlightStyle: config.highlightStyle,
+          highlightLines: true,
+          countIncrementalSlides: false,
+          count: config.count !== 'false',
+          navigation: {
+            scroll: false,
+            touch: true,
+            click: false,
+          },
+        });
+
+        slideshow.on("afterShowSlide", function() {
+          setTimeout(function() {
+            initVueComponents();
+            initMermaidDiagrams();
+            initMathJax();
+            initPanguJS();
+          }, 100);
+        });
+
+        setTimeout(function() {
+          initVueComponents();
+          initPreviewCards();
+          initMermaidDiagrams();
+          initMathJax();
+          initPanguJS();
+        }, 300);
+      }
+
+      function initVueComponents() {
+        var elements = document.querySelectorAll(".vue");
+        for (var i = 0; i < elements.length; i++) {
+          if (!elements[i].__vue__) {
+            try {
+              var vm = new Vue({
+                el: elements[i],
+              });
+              vueInstances.push(vm);
+            } catch (e) {
+              console.error("Vue初始化失败:", e);
+            }
+          }
+        }
+      }
+
+      function initPreviewCards() {
+        var cards = document.querySelectorAll(".preview-win");
+        for (var i = 0; i < cards.length; i++) {
+          var card = cards[i];
+          if (!card._clickBound) {
+            card._clickBound = true;
+            card.addEventListener("click", function(e) {
+              var img = this.querySelector("img");
+              if (img) {
+                window.open(img.src);
+              }
+            });
+          }
+        }
+      }
+
+      function initMermaidDiagrams() {
+        var mermaidElements = document.querySelectorAll(".mermaid:not([data-processed])");
+        if (mermaidElements.length === 0) return;
+
+        mermaid.mermaidAPI.initialize({
+          startOnLoad: false,
+          theme: "forest",
+          themeCSS:
+            ".tick>text { font-size:26px; } .taskTextOutsideRight,.taskTextOutsideLeft { font-size:20px; } .titleText {font-size:30px;} .sectionTitle {font-size:20px;}",
+          gantt: {
+            fontSize: 26,
+            barHeight: 30,
+            useMaxWidth: false,
+          },
+        });
+
+        for (var i = 0; i < mermaidElements.length; i++) {
+          var element = mermaidElements[i];
+
+          (function(el, idx) {
+            var graphDefinition = "";
+            var preElements = el.querySelectorAll("pre");
+            for (var j = 0; j < preElements.length; j++) {
+              graphDefinition += preElements[j].textContent.replace(/\\n/g, "<br/>");
+            }
+
+            if (graphDefinition.trim()) {
+              var renderId = "mermaid_" + mermaidRenderId++ + "_" + idx;
+              try {
+                mermaid.mermaidAPI.render(
+                  renderId,
+                  graphDefinition,
+                  function(svgCode) {
+                    el.innerHTML = svgCode;
+                    el.setAttribute("data-processed", "true");
+                  }
+                );
+              } catch (e) {
+                console.error("Mermaid渲染失败:", e);
+              }
+            }
+          })(element, i);
+        }
+      }
+
+      function initMathJax() {
+        if (mathJaxTimer) {
+          clearTimeout(mathJaxTimer);
+        }
+        mathJaxTimer = setTimeout(function() {
+          if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise().catch(function(err) {
+              console.error("MathJax渲染失败:", err);
+            });
+          }
+          mathJaxTimer = null;
+        }, 50);
+      }
+
+      function initPanguJS() {
+        if (window.pangu) {
+          pangu.spacingElementByClassName('pangujs');
+        }
+      }
+
+      function initSlideLibraries() {
+        initVueComponents();
+        initPreviewCards();
+        initMermaidDiagrams();
+        initMathJax();
+        initPanguJS();
+      }
+
+      function updatePreview() {
+        if (updateTimer) {
+          clearTimeout(updateTimer);
+        }
+
+        updateTimer = setTimeout(function() {
+          var editorContent = document.getElementById("markdown-editor").value;
+          var sourceEl = document.getElementById("source");
+
+          var processedContent = preprocessMarkdown(editorContent);
+          sourceEl.value = processedContent;
+
+          if (slideshow) {
+            var currentSlideIndex = slideshow.getCurrentSlideIndex();
+            var remarkContainer = document.getElementById("remark-container");
+            remarkContainer.innerHTML = "";
+            slideshow = null;
+
+            var config = getConfigSelectValues();
+
+            slideshow = remark.create({
+              source: processedContent,
+              container: remarkContainer,
+              ratio: config.ratio,
+              highlightStyle: config.highlightStyle,
+              highlightLines: true,
+              countIncrementalSlides: false,
+              count: config.count !== 'false',
+              navigation: {
+                scroll: false,
+                touch: true,
+                click: false,
+              },
+            });
+
+            slideshow.on("afterShowSlide", function() {
+              setTimeout(function() {
+                initSlideLibraries();
+              }, 100);
+            });
+
+            setTimeout(function() {
+              slideshow.gotoSlide(currentSlideIndex + 1);
+              initSlideLibraries();
+            }, 150);
+          }
+        }, 300);
+      }
+
+      function loadSlidesToEditor() {
+        var loadingOverlay = document.getElementById("loading-overlay");
+        loadingOverlay.classList.remove("hidden");
+
+        var fullContent = loadAllSlidesSync();
+
+        var parsed = parseGlobalConfigHeader(fullContent);
+        var config = getConfigSelectValues();
+        var header = buildGlobalConfigHeader(config);
+        var finalContent = header + parsed.body;
+
+        var editor = document.getElementById("markdown-editor");
+        editor.value = finalContent;
+
+        var sourceEl = document.getElementById("source");
+        sourceEl.value = finalContent;
+
+        var remarkContainer = document.getElementById("remark-container");
+        remarkContainer.innerHTML = "";
+        slideshow = null;
+
+        setTimeout(function() {
+          var processedContent = preprocessMarkdown(finalContent);
+          sourceEl.value = processedContent;
+
+          var cfg = getConfigSelectValues();
+
+          slideshow = remark.create({
+            source: processedContent,
+            container: remarkContainer,
+            ratio: cfg.ratio,
+            highlightStyle: cfg.highlightStyle,
+            highlightLines: true,
+            countIncrementalSlides: false,
+            count: cfg.count !== 'false',
+            navigation: {
+              scroll: false,
+              touch: true,
+              click: false,
+            },
+          });
+
+          slideshow.on("afterShowSlide", function() {
+            setTimeout(function() {
+              initVueComponents();
+              initMermaidDiagrams();
+              initMathJax();
+              initPanguJS();
+            }, 100);
+          });
+
+          setTimeout(function() {
+            initVueComponents();
+            initPreviewCards();
+            initMermaidDiagrams();
+            initMathJax();
+            initPanguJS();
+            loadingOverlay.classList.add("hidden");
+
+            setTimeout(function() {
+              updatePreview();
+            }, 200);
+          }, 500);
+        }, 100);
+      }
+
+      function isFullScreen() {
+        return (
+          window.fullScreen ||
+          (window.innerWidth == screen.width &&
+            window.innerHeight == screen.height)
+        );
+      }
+
+      window.addEventListener("resize", function() {
+        if (isFullScreen()) {
+          document.body.style["background-color"] = "#000";
+        } else {
+          document.body.style["background-color"] = "#d7d8d2";
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", function() {
+        var editor = document.getElementById("markdown-editor");
+        var loadButton = document.getElementById("btn-load-slides");
+
+        editor.addEventListener("input", function() {
+          if (!isConfigUpdating) {
+            var parsed = parseGlobalConfigHeader(editor.value);
+            setConfigSelectValues(parsed.config);
+            updatePreview();
+          }
+        });
+
+        loadButton.addEventListener("click", function() {
+          loadSlidesToEditor();
+        });
+
+        var configSelects = document.querySelectorAll('.config-bar select');
+        for (var i = 0; i < configSelects.length; i++) {
+          configSelects[i].addEventListener('change', function() {
+            isConfigUpdating = true;
+            updateEditorHeader();
+            isConfigUpdating = false;
+            updatePreview();
+          });
+        }
+
+        window.addEventListener('message', function(e) {
+          if (e.data && e.data.type === 'UPDATE_MARKDOWN') {
+            var content = e.data.content;
+            var config = e.data.config;
+
+            editor.value = content;
+
+            if (config) {
+              setConfigSelectValues(config);
+            }
+
+            var sourceEl = document.getElementById("source");
+            sourceEl.value = content;
+
+            if (slideshow) {
+              var remarkContainer = document.getElementById("remark-container");
+              remarkContainer.innerHTML = "";
+              slideshow = null;
+
+              var cfg = getConfigSelectValues();
+
+              slideshow = remark.create({
+                source: content,
+                container: remarkContainer,
+                ratio: cfg.ratio,
+                highlightStyle: cfg.highlightStyle,
+                highlightLines: true,
+                countIncrementalSlides: false,
+                count: cfg.count !== 'false',
+                navigation: {
+                  scroll: false,
+                  touch: true,
+                  click: false,
+                },
+              });
+
+              slideshow.on("afterShowSlide", function() {
+                setTimeout(function() {
+                  initSlideLibraries();
+                }, 100);
+              });
+
+              setTimeout(function() {
+                initSlideLibraries();
+              }, 150);
+            }
+          }
+        });
+
+        if (window.parent !== window) {
+          document.body.classList.add('iframe-mode');
+          window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
+        }
+
+        loadSlidesToEditor();
+      });
+    </script>
+  </body>
+</html>

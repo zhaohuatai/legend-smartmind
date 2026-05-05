@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>PPT 预览</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" type="text/css" href="./css/quasar.min.css" />
+    <link rel="stylesheet" type="text/css" href="./css/pure-min.css" />
+    <link rel="stylesheet" type="text/css" href="./css/spaces.css" />
+    <link rel="stylesheet" type="text/css" href="./css/typo.css" />
+    <link rel="stylesheet" type="text/css" href="./css/devices.min.css" />
+    <link rel="stylesheet" type="text/css" href="./css/gh-fork-ribbon.css" />
+    <link rel="stylesheet" type="text/css" href="./css/nord-dark.css" />
+    <link rel="stylesheet" type="text/css" href="./css/nord-light.css" />
+    <link rel="stylesheet" type="text/css" href="./css/font-nord.css" />
+    <link rel="stylesheet" type="text/css" href="./css/bg-nord.css" />
+    <link rel="stylesheet" type="text/css" href="./css/font-open-color.css" />
+    <link rel="stylesheet" type="text/css" href="./css/bg-open-color.css" />
+    <link rel="stylesheet" type="text/css" href="./css/material-icons.css" />
+    <link rel="stylesheet" type="text/css" href="./css/abs-layout.css" />
+    <link rel="stylesheet" type="text/css" href="./css/border-layout.css" />
+    <link rel="stylesheet" type="text/css" href="./css/text-rect.css" />
+    <link rel="stylesheet" type="text/css" href="./css/text-circle.css" />
+    <link rel="stylesheet" type="text/css" href="./css/card.css" />
+    <link rel="stylesheet" type="text/css" href="./css/lines.css" />
+    <link rel="stylesheet" type="text/css" href="./css/filters.css" />
+    <link rel="stylesheet" type="text/css" href="./fonts/remixicon.css" />
+    <link rel="stylesheet" type="text/css" href="./css/style.css" />
+    <script src="js/data-loader.js?v=6"></script>
+    <script>
+      MathJax = {
+        loader: {
+          load: ["input/tex-base", "[tex]/newcommand", "output/chtml"],
+        },
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+        },
+        options: {
+          skipHtmlTags: [
+            "script",
+            "noscript",
+            "style",
+            "textarea",
+            "pre",
+            "code",
+            "annotation",
+            "annotation-xml",
+          ],
+          ignoreHtmlClass: "tex2jax_ignore",
+        },
+      };
+    </script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html, body {
+        height: 100%;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        background: #d7d8d2;
+      }
+
+      .preview-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        width: 100vw;
+        background: #d7d8d2;
+      }
+
+      .preview-toolbar {
+        padding: 10px 16px;
+        border-bottom: 1px solid #e8e8e8;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #fafafa;
+      }
+
+      .preview-toolbar .toolbar-title {
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .preview-toolbar .toolbar-title i {
+        color: #1890ff;
+      }
+
+      .preview-toolbar .toolbar-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .preview-toolbar .toolbar-actions button {
+        padding: 5px 12px;
+        border: 1px solid #d9d9d9;
+        background: #fff;
+        color: #666;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.2s;
+      }
+
+      .preview-toolbar .toolbar-actions button:hover {
+        border-color: #1890ff;
+        color: #1890ff;
+      }
+
+      .preview-content {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+        background: #d7d8d2;
+      }
+
+      #remark-container {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      .slide-controls {
+        padding: 10px 16px;
+        background: #262626;
+        border-top: 1px solid #444;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .slide-controls button {
+        padding: 4px 10px;
+        border: 1px solid #555;
+        background: #333;
+        color: #fff;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.2s;
+      }
+
+      .slide-controls button:hover {
+        background: #444;
+        border-color: #666;
+      }
+
+      .slide-controls button:disabled {
+        background: #222;
+        border-color: #444;
+        color: #666;
+        cursor: not-allowed;
+      }
+
+      .page-indicator {
+        color: #fff;
+        font-size: 13px;
+        min-width: 60px;
+        text-align: center;
+      }
+
+      .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: #8c8c8c;
+        font-size: 16px;
+        gap: 12px;
+      }
+
+      .empty-state i {
+        font-size: 48px;
+        color: #bfbfbf;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="preview-container">
+      <div class="preview-content">
+        <div id="remark-container"></div>
+        <div id="empty-state" class="empty-state">
+          <i class="ri-slideshow-2-line"></i>
+          <span>等待 Markdown 内容...</span>
+        </div>
+      </div>
+      <div class="slide-controls">
+        <button id="btn-prev-slide"><i class="ri-arrow-left-s-line"></i> 上页</button>
+        <span class="page-indicator" id="page-indicator">1 / 1</span>
+        <button id="btn-next-slide">下页 <i class="ri-arrow-right-s-line"></i></button>
+        <button id="btn-toggle-ratio"><i class="ri-aspect-ratio-line"></i> 比例</button>
+        <button id="btn-fullscreen" title="全屏"><i class="ri-fullscreen-line"></i> 全屏</button>
+      </div>
+    </div>
+
+    <textarea id="source" style="display:none;"></textarea>
+
+    <script src="js/remark.min.js"></script>
+    <script src="js/vue.js"></script>
+    <script src="js/quasar.umd.min.js"></script>
+    <script src="js/mermaid.min.js"></script>
+    <script id="MathJax-script" async src="js/tex-mml-chtml.js"></script>
+    <script src="js/pangu.js"></script>
+
+    <script>
+      var slideshow = null;
+      var vueInstances = [];
+      var mathJaxTimer = null;
+      var mermaidRenderId = 0;
+
+      var btnFullscreen = document.getElementById('btn-fullscreen');
+      var btnPrevSlide = document.getElementById('btn-prev-slide');
+      var btnNextSlide = document.getElementById('btn-next-slide');
+      var btnToggleRatio = document.getElementById('btn-toggle-ratio');
+      var pageIndicator = document.getElementById('page-indicator');
+      var emptyState = document.getElementById('empty-state');
+
+      var currentSlide = 1;
+      var totalSlides = 1;
+      var isDarkTheme = true;
+      var currentRatio = '4:3';
+      var rawMarkdownContent = '';
+
+      var currentConfig = {
+        ratio: '4:3',
+        highlightStyle: 'github'
+      };
+
+      function getConfigFromSelects() {
+        return {
+          highlightStyle: 'github'
+        };
+      }
+
+      function setConfigToSelects(config) {
+      }
+
+      function preprocessMarkdown(text) {
+        var targetText = text.replace(
+          /```[^`]+```/gm,
+          function(match) {
+            return match.replace(/[ ]/gm, "\u3000");
+          }
+        );
+        var lines = targetText.split("\n");
+        return lines
+          .map(function(line) {
+            return line.replace(/^(?![ ]+[\-|0-9])[ ]+/, "");
+          })
+          .map(function(line) {
+            return line.replace(/\u3000/g, " ");
+          })
+          .join("\n");
+      }
+
+      function initSlideLibraries() {
+        initVueComponents();
+        initMermaidDiagrams();
+        initMathJax();
+        initPanguJS();
+      }
+
+      function initVueComponents() {
+        var elements = document.querySelectorAll(".vue");
+        for (var i = 0; i < elements.length; i++) {
+          if (!elements[i].__vue__) {
+            try {
+              var vm = new Vue({
+                el: elements[i],
+              });
+              vueInstances.push(vm);
+            } catch (e) {
+              console.error("Vue初始化失败:", e);
+            }
+          }
+        }
+      }
+
+      function initMermaidDiagrams() {
+        var mermaidElements = document.querySelectorAll(".mermaid:not([data-processed])");
+        if (mermaidElements.length === 0) return;
+
+        mermaid.mermaidAPI.initialize({
+          startOnLoad: false,
+          theme: "forest",
+          themeCSS:
+            ".tick>text { font-size:26px; } .taskTextOutsideRight,.taskTextOutsideLeft { font-size:20px; } .titleText {font-size:30px;} .sectionTitle {font-size:20px;}",
+          gantt: {
+            fontSize: 26,
+            barHeight: 30,
+            useMaxWidth: false,
+          },
+        });
+
+        for (var i = 0; i < mermaidElements.length; i++) {
+          var element = mermaidElements[i];
+
+          (function(el, idx) {
+            var graphDefinition = "";
+            var preElements = el.querySelectorAll("pre");
+            for (var j = 0; j < preElements.length; j++) {
+              graphDefinition += preElements[j].textContent.replace(/\\n/g, "<br/>");
+            }
+
+            if (graphDefinition.trim()) {
+              var renderId = "mermaid_" + mermaidRenderId++ + "_" + idx;
+              try {
+                mermaid.mermaidAPI.render(
+                  renderId,
+                  graphDefinition,
+                  function(svgCode) {
+                    el.innerHTML = svgCode;
+                    el.setAttribute("data-processed", "true");
+                  }
+                );
+              } catch (e) {
+                console.error("Mermaid渲染失败:", e);
+              }
+            }
+          })(element, i);
+        }
+      }
+
+      function initMathJax() {
+        if (mathJaxTimer) {
+          clearTimeout(mathJaxTimer);
+        }
+        mathJaxTimer = setTimeout(function() {
+          if (window.MathJax && window.MathJax.typesetPromise) {
+            MathJax.typesetPromise().catch(function(err) {
+              console.error("MathJax渲染失败:", err);
+            });
+          }
+          mathJaxTimer = null;
+        }, 50);
+      }
+
+      function initPanguJS() {
+        if (window.pangu) {
+          pangu.spacingElementByClassName('pangujs');
+        }
+      }
+
+      function renderSlideshow(content, targetSlideIndex) {
+        var processedContent = preprocessMarkdown(content);
+        var sourceEl = document.getElementById("source");
+        sourceEl.value = processedContent;
+        rawMarkdownContent = content;
+
+        var remarkContainer = document.getElementById("remark-container");
+
+        if (slideshow) {
+          remarkContainer.innerHTML = "";
+          slideshow = null;
+        }
+
+        slideshow = remark.create({
+          source: processedContent,
+          container: remarkContainer,
+          ratio: currentConfig.ratio,
+          highlightStyle: currentConfig.highlightStyle,
+          highlightLines: true,
+          countIncrementalSlides: false,
+          navigation: {
+            scroll: false,
+            touch: true,
+            click: false,
+          },
+        });
+
+        slideshow.on("afterShowSlide", function() {
+          setTimeout(function() {
+            initSlideLibraries();
+          }, 100);
+        });
+
+        setTimeout(function() {
+          initSlideLibraries();
+          updateSlideInfo();
+          if (emptyState) {
+            emptyState.style.display = 'none';
+          }
+        }, 300);
+      }
+
+      function updateSlideInfo() {
+        if (slideshow) {
+          totalSlides = slideshow.getSlideCount();
+          currentSlide = slideshow.getCurrentSlideIndex() + 1;
+          pageIndicator.textContent = currentSlide + ' / ' + totalSlides;
+          btnPrevSlide.disabled = currentSlide <= 1;
+          btnNextSlide.disabled = currentSlide >= totalSlides;
+        }
+      }
+
+      btnFullscreen.addEventListener('click', function() {
+        var previewContent = document.querySelector('.preview-content');
+        if (previewContent.requestFullscreen) {
+          previewContent.requestFullscreen();
+        } else if (previewContent.webkitRequestFullscreen) {
+          previewContent.webkitRequestFullscreen();
+        }
+      });
+
+      btnPrevSlide.addEventListener('click', function() {
+        if (slideshow && currentSlide > 1) {
+          slideshow.gotoPreviousSlide();
+          setTimeout(updateSlideInfo, 100);
+        }
+      });
+
+      btnNextSlide.addEventListener('click', function() {
+        if (slideshow && currentSlide < totalSlides) {
+          slideshow.gotoNextSlide();
+          setTimeout(updateSlideInfo, 100);
+        }
+      });
+
+      btnToggleRatio.addEventListener('click', function() {
+        currentRatio = currentRatio === '4:3' ? '16:9' : '4:3';
+        currentConfig.ratio = currentRatio;
+
+        var content = document.getElementById('source').value;
+        if (content) {
+          renderSlideshow(content);
+        }
+      });
+
+      window.addEventListener('message', function(e) {
+        if (e.data && e.data.type === 'UPDATE_MARKDOWN') {
+          var content = e.data.content || '';
+          var targetSlide = e.data.targetSlide || null;
+
+          if (content.trim()) {
+            renderSlideshow(content, targetSlide);
+          }
+        } else if (e.data && e.data.type === 'GOTO_PAGE') {
+          var pageIndex = e.data.pageIndex;
+          if (slideshow && pageIndex >= 1 && pageIndex <= totalSlides) {
+            slideshow.gotoSlide(pageIndex);
+            setTimeout(updateSlideInfo, 100);
+          }
+        }
+      });
+
+      window.parent.postMessage({ type: 'IFRAME_READY' }, '*');
+    </script>
+  </body>
+</html>

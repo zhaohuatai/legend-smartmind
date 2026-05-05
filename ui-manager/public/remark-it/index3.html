@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Markdown PPT Editor</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="user-scalable=no,initial-scale=1,maximum-scale=1,minimum-scale=1,width=device-width"
+    />
+    <link rel="stylesheet" type="text/css" href="./css/quasar.min.css" />
+    <link rel="stylesheet" type="text/css" href="./css/pure-min.css" />
+    <link rel="stylesheet" type="text/css" href="./css/spaces.css" />
+    <link rel="stylesheet" type="text/css" href="./css/typo.css" />
+    <link rel="stylesheet" type="text/css" href="./css/devices.min.css" />
+    <link rel="stylesheet" type="text/css" href="./css/gh-fork-ribbon.css" />
+    <link rel="stylesheet" type="text/css" href="./css/nord-dark.css" />
+    <link rel="stylesheet" type="text/css" href="./css/nord-light.css" />
+    <link rel="stylesheet" type="text/css" href="./css/font-nord.css" />
+    <link rel="stylesheet" type="text/css" href="./css/bg-nord.css" />
+    <link rel="stylesheet" type="text/css" href="./css/font-open-color.css" />
+    <link rel="stylesheet" type="text/css" href="./css/bg-open-color.css" />
+    <link rel="stylesheet" type="text/css" href="./css/material-icons.css" />
+    <link rel="stylesheet" type="text/css" href="./css/abs-layout.css" />
+    <link rel="stylesheet" type="text/css" href="./css/border-layout.css" />
+    <link rel="stylesheet" type="text/css" href="./css/text-rect.css" />
+    <link rel="stylesheet" type="text/css" href="./css/text-circle.css" />
+    <link rel="stylesheet" type="text/css" href="./css/card.css" />
+    <link rel="stylesheet" type="text/css" href="./css/lines.css" />
+    <link rel="stylesheet" type="text/css" href="./css/filters.css" />
+    <link rel="stylesheet" type="text/css" href="./fonts/remixicon.css" />
+    <link rel="stylesheet" type="text/css" href="./css/style.css" />
+    <script src="js/data-loader.js?v=4"></script>
+    <script>
+      MathJax = {
+        loader: {
+          load: ["input/tex-base", "[tex]/newcommand", "output/chtml"],
+        },
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+        },
+        options: {
+          skipHtmlTags: [
+            "script",
+            "noscript",
+            "style",
+            "textarea",
+            "pre",
+            "code",
+            "annotation",
+            "annotation-xml",
+          ],
+          ignoreHtmlClass: "tex2jax_ignore",
+        },
+      };
+    </script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html, body {
+        height: 100%;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+      }
+
+      .container {
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+      }
+
+      .editor-panel {
+        width: 40%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        border-right: 2px solid #ccc;
+        background: #f5f5f5;
+      }
+
+      .editor-header {
+        padding: 10px 15px;
+        background: #2c3e50;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .editor-header button {
+        padding: 5px 15px;
+        background: #3498db;
+        color: white;
+        border: none;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      .editor-header button:hover {
+        background: #2980b9;
+      }
+
+      #markdown-editor {
+        flex: 1;
+        width: 100%;
+        padding: 15px;
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+        font-size: 14px;
+        line-height: 1.6;
+        border: none;
+        outline: none;
+        resize: none;
+        background: #fafafa;
+        color: #333;
+        overflow-y: auto;
+      }
+
+      .preview-panel {
+        width: 60%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background: #d7d8d2;
+      }
+
+      .preview-header {
+        padding: 10px 15px;
+        background: #2c3e50;
+        color: white;
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .preview-content {
+        flex: 1;
+        overflow: hidden;
+        position: relative;
+        background: #d7d8d2;
+      }
+
+      #remark-container {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 24px;
+        color: #666;
+        z-index: 1000;
+      }
+
+      .loading-overlay.hidden {
+        display: none;
+      }
+
+      #source {
+        position: absolute;
+        left: -9999px;
+        top: -9999px;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="editor-panel">
+        <div class="editor-header">
+          <span>Markdown 编辑器</span>
+          <button id="btn-load-slides">加载幻灯片</button>
+        </div>
+        <textarea id="markdown-editor" placeholder="在此输入Markdown内容..."></textarea>
+      </div>
+
+      <div class="preview-panel">
+        <div class="preview-header">PPT 演示区域</div>
+        <div class="preview-content" id="preview-content">
+          <div class="loading-overlay" id="loading-overlay">加载中...</div>
+          <div id="remark-container"></div>
+        </div>
+      </div>
+    </div>
+
+    <textarea id="source" style="display:none;"></textarea>
+
+    <script src="js/remark.min.js"></script>
+    <script src="js/vue.js"></script>
+    <script src="js/quasar.umd.min.js"></script>
+    <script src="js/mermaid.min.js"></script>
+    <script id="MathJax-script" async src="js/tex-mml-chtml.js"></script>
+    <script src="js/pangu.js"></script>
+
+    <script>
+      var slideshow = null;
+      var updateTimer = null;
+
+      function preprocessMarkdown(text) {
+        var targetText = text.replace(
+          /```[^`]+```/gm,
+          function(match) {
+            return match.replace(/[ ]/gm, "\u3000");
+          }
+        );
+        var lines = targetText.split("\n");
+        return lines
+          .map(function(line) {
+            return line.replace(/^(?![ ]+[\-|0-9])[ ]+/, "");
+          })
+          .map(function(line) {
+            return line.replace(/\u3000/g, " ");
+          })
+          .join("\n");
+      }
+
+      function initRemarkSlideShow() {
+        var sourceEl = document.getElementById("source");
+        var processedContent = preprocessMarkdown(sourceEl.value);
+        sourceEl.value = processedContent;
+
+        var remarkContainer = document.getElementById("remark-container");
+
+        slideshow = remark.create({
+          source: processedContent,
+          container: remarkContainer,
+          ratio: "4:3",
+          highlightStyle: "github",
+          highlightLines: true,
+          countIncrementalSlides: false,
+          navigation: {
+            scroll: false,
+            touch: true,
+            click: false,
+          },
+        });
+
+        slideshow.on("afterShowSlide", function() {
+          setTimeout(function() {
+            initVueComponents();
+            initMermaidDiagrams();
+            initMathJax();
+            initPanguJS();
+          }, 100);
+        });
+
+        setTimeout(function() {
+          initVueComponents();
+          initPreviewCards();
+          initMermaidDiagrams();
+          initMathJax();
+          initPanguJS();
+        }, 300);
+      }
+
+      function initVueComponents() {
+        var elements = document.querySelectorAll(".vue");
+        for (var i = 0; i < elements.length; i++) {
+          if (!elements[i].__vue__) {
+            new Vue({
+              el: elements[i],
+            });
+          }
+        }
+      }
+
+      function initPreviewCards() {
+        var cards = document.querySelectorAll(".preview-win");
+        for (var i = 0; i < cards.length; i++) {
+          (function(card) {
+            card.addEventListener("click", function(e) {
+              var img = card.querySelector("img");
+              if (img) {
+                window.open(img.src);
+              }
+            });
+          })(cards[i]);
+        }
+      }
+
+      function initMermaidDiagrams() {
+        mermaid.mermaidAPI.initialize({
+          startOnLoad: false,
+          theme: "forest",
+          themeCSS:
+            ".tick>text { font-size:26px; } .taskTextOutsideRight,.taskTextOutsideLeft { font-size:20px; } .titleText {font-size:30px;} .sectionTitle {font-size:20px;}",
+          gantt: {
+            fontSize: 26,
+            barHeight: 30,
+            useMaxWidth: false,
+          },
+        });
+
+        var mermaidElements = document.querySelectorAll(".mermaid");
+        for (var i = 0; i < mermaidElements.length; i++) {
+          (function(element, index) {
+            if (element.getAttribute("data-processed")) return;
+
+            var insertSvg = function(svgCode) {
+              element.innerHTML = svgCode;
+              element.setAttribute("data-processed", "true");
+            };
+
+            var graphDefinition = "";
+            var preElements = element.querySelectorAll("pre");
+            for (var j = 0; j < preElements.length; j++) {
+              graphDefinition += preElements[j].textContent.replace(/\\n/g, "<br/>");
+            }
+
+            if (graphDefinition.trim()) {
+              try {
+                mermaid.mermaidAPI.render(
+                  "graphDiv" + index,
+                  graphDefinition,
+                  insertSvg
+                );
+              } catch (e) {
+                console.error("Mermaid渲染失败:", e);
+              }
+            }
+          })(mermaidElements[i], i);
+        }
+      }
+
+      function initMathJax() {
+        if (window.MathJax && window.MathJax.typesetPromise) {
+          MathJax.typesetPromise().catch(function(err) {
+            console.error("MathJax渲染失败:", err);
+          });
+        }
+      }
+
+      function initPanguJS() {
+        if (window.pangu) {
+          pangu.spacingElementByClassName('pangujs');
+        }
+      }
+
+      function updatePreview() {
+        if (updateTimer) {
+          clearTimeout(updateTimer);
+        }
+
+        updateTimer = setTimeout(function() {
+          var editorContent = document.getElementById("markdown-editor").value;
+          var sourceEl = document.getElementById("source");
+
+          var processedContent = preprocessMarkdown(editorContent);
+          sourceEl.value = processedContent;
+
+          if (slideshow) {
+            var remarkContainer = document.getElementById("remark-container");
+            remarkContainer.innerHTML = "";
+            slideshow = null;
+
+            slideshow = remark.create({
+              source: processedContent,
+              container: remarkContainer,
+              ratio: "4:3",
+              highlightStyle: "github",
+              highlightLines: true,
+              countIncrementalSlides: false,
+              navigation: {
+                scroll: false,
+                touch: true,
+                click: false,
+              },
+            });
+
+            slideshow.on("afterShowSlide", function() {
+              setTimeout(function() {
+                initVueComponents();
+                initMermaidDiagrams();
+                initMathJax();
+                initPanguJS();
+              }, 100);
+            });
+
+            setTimeout(function() {
+              initVueComponents();
+              initMermaidDiagrams();
+              initMathJax();
+              initPanguJS();
+            }, 150);
+          }
+        }, 300);
+      }
+
+      function loadSlidesToEditor() {
+        var loadingOverlay = document.getElementById("loading-overlay");
+        loadingOverlay.classList.remove("hidden");
+
+        var fullContent = loadAllSlidesSync();
+
+        var processedContent = preprocessMarkdown(fullContent);
+
+        var editor = document.getElementById("markdown-editor");
+        editor.value = processedContent;
+
+        var sourceEl = document.getElementById("source");
+        sourceEl.value = processedContent;
+
+        var remarkContainer = document.getElementById("remark-container");
+        remarkContainer.innerHTML = "";
+        slideshow = null;
+
+        setTimeout(function() {
+          slideshow = remark.create({
+            source: processedContent,
+            container: remarkContainer,
+            ratio: "4:3",
+            highlightStyle: "github",
+            highlightLines: true,
+            countIncrementalSlides: false,
+            navigation: {
+              scroll: false,
+              touch: true,
+              click: false,
+            },
+          });
+
+          slideshow.on("afterShowSlide", function() {
+            setTimeout(function() {
+              initVueComponents();
+              initMermaidDiagrams();
+              initMathJax();
+              initPanguJS();
+            }, 100);
+          });
+
+          setTimeout(function() {
+            initVueComponents();
+            initPreviewCards();
+            initMermaidDiagrams();
+            initMathJax();
+            initPanguJS();
+            loadingOverlay.classList.add("hidden");
+
+            setTimeout(function() {
+              updatePreview();
+            }, 200);
+          }, 500);
+        }, 100);
+      }
+
+      function isFullScreen() {
+        return (
+          window.fullScreen ||
+          (window.innerWidth == screen.width &&
+            window.innerHeight == screen.height)
+        );
+      }
+
+      window.addEventListener("resize", function() {
+        if (isFullScreen()) {
+          document.body.style["background-color"] = "#000";
+        } else {
+          document.body.style["background-color"] = "#d7d8d2";
+        }
+      });
+
+      document.addEventListener("DOMContentLoaded", function() {
+        var editor = document.getElementById("markdown-editor");
+        var loadButton = document.getElementById("btn-load-slides");
+
+        editor.addEventListener("input", function() {
+          updatePreview();
+        });
+
+        loadButton.addEventListener("click", function() {
+          loadSlidesToEditor();
+        });
+
+        loadSlidesToEditor();
+      });
+    </script>
+  </body>
+</html>
