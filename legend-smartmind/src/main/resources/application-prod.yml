@@ -1,0 +1,35 @@
+server: 
+ port: 8081
+ compression: 
+  enabled: false
+
+
+spring:
+ datasource:
+  driver-class-name: com.mysql.cj.jdbc.Driver  # com.mysql.jdbc.Driver
+  #jndi-name:  # JNDI location of the datasource. Class, url, username & password are ignored when set.
+  name: datasource # Name of the datasource.
+  url: jdbc:mysql://192.168.31.154:33081/pentest_framework?allowMutiQueries=true&rewriteBatchedStatements=true&useUnicode=true&serverTimezone=GMT%2B8&characterEncoding=UTF-8&useSSL=true&autoReconnect=true#&zeroDateTimeBehavior=convertToNull&tcpKeepAlive=true # JDBC url of the database.
+  username: root
+  password: 
+  druid: 
+   initialSize: 6
+   minIdle: 5
+   maxActive: 10
+   maxWait: 60000
+   timeBetweenEvictionRunsMillis: 60000
+   minEvictableIdleTimeMillis: 300000
+   validationQuery: SELECT 1 from dual
+   testWhileIdle: true
+   testOnBorrow: false
+   testOnReturn: false
+   poolPreparedStatements: true
+   maxPoolPreparedStatementPerConnectionSize: 21
+   #filters: wall,stat
+
+#工程路径以及模块名称,生成代码需要
+frontbus:
+ projectPath: "D:/shensiyiliao"
+ moduleName: "ssyl-zbss-frontbus/ssyl-zbss-frontbus-exchange-impls"
+
+

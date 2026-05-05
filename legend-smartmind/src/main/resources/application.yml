@@ -1,0 +1,110 @@
+server:
+ shutdown: graceful
+ 
+ servlet:
+  context-path: /
+ 
+ compression:
+  enabled: true
+  mime-types: application/json,application/xml,text/html,text/plain,text/css,application/javascript
+  min-response-size: 1024  # 只压缩大于 1KB 的响应
+
+spring:
+  application:
+    name: pentest-ai
+  main: 
+   allow-circular-references: true
+   allow-bean-definition-overriding: true
+   keep-alive: true #即使所有线程都是虚拟线程，JVM 也会保持运行状态。
+
+  profiles:
+   active: dev
+  # ==================== Spring AI 模型配置 ====================
+  ai:
+    # DashScope (通义千问) — 默认模型提供商
+    dashscope:
+      api-key: XXXX
+      chat:
+        options:
+          model: qwen-max
+          #temperature: 0.1  # 渗透测试决策需要低随机性
+          timeout: 1200000  # 20分钟
+#    ollama:
+#     base-url: https:/127.0.0.1:8443
+ #    chat:
+ #     model: modelscope.cn/unsloth/DeepSeek-R1-Distill-Qwen-32B-GGUF:Q4_K_M
+    # 备选：OpenAI 兼容接口（DeepSeek/GPT）
+    # openai:
+    #   api-key: ${OPENAI_API_KEY}
+    #   base-url: https://api.deepseek.com/v1
+    #   chat:
+    #     options:
+    #       model: deepseek-chat
+
+mybatis: 
+ type-aliases-package: com.smartmind.biz.bo.model
+ mapper-scan-package: com.smartmind.biz.dao
+ configuration:
+  map-underscore-to-camel-case: true
+  default-fetch-size: 100
+  default-statement-timeout: 30
+  log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  log-enabled: true
+
+# ==================== 渗透测试系统配置 ====================
+pentest:
+  # 目标白名单（逗号分隔，空则不限制）
+  target-whitelist: ""
+
+  # OOB 外带验证配置
+  oob:
+    attacker-ip: ${OOB_ATTACKER_IP:10.0.0.1}
+    dns-domain: oob.pentest.local
+    ldap-port: 1389
+    http-callback-port: 8888
+
+  # 工具配置
+  tools:
+    # 证据存储根目录
+    artifacts-dir: ./artifacts
+    # 工具执行默认超时（秒）
+    default-timeout: 300
+    # 并发任务数上限
+    max-concurrent-tasks: 3
+
+  # 报告配置
+  report:
+    output-dir: ./reports
+    template-dir: classpath:templates/
+
+# ==================== 日志配置 ====================
+logging:
+  file:
+    name: logs/pentest-ai.log
+  level:
+    com.pentest: INFO
+    com.alibaba.cloud.ai: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %class{36}.%method:%line - %msg%n"
+
+
+legend:
+ tenant-mode: multi
+ datasorucestat:
+  enabled: true
+  loginUsername: admin
+  loginPassword: admin
+ auth:
+   cache-type: redis
+   frame: shiro
+   cors: true
+   captcha: 
+     enabled: true
+     cache-type: redis #memory
+   config:
+    filter-chain-definition: 
+      - /api/**:anon
+      - /manager/test/**:anon
+      - /manager/pub/**:anon
+      - /manager/**:anon
+      - /**:anon

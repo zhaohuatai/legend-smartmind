@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.smartmind.biz.dao.QuestionMapper" >
+
+    <select id="selectByCourseAndUnit" resultType="com.smartmind.biz.bo.model.Question">
+        SELECT * FROM smd_question
+        WHERE course_id = #{courseId}
+        AND unit_code LIKE CONCAT(#{unitCode}, '%')
+        AND status = '1'
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

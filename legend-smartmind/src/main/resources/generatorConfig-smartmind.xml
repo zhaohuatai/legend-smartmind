@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+  <classPathEntry location="D:\maven\repository\mysql\mysql-connector-java\8.0.27\mysql-connector-java-8.0.27.jar"/>
+  <context id="MysqlTables_com.smartmind.biz"   targetRuntime="MyBatis3" >
+	 <property name="nameSpace" value="/manage/smartmind" />
+	 <property name="targetPackage" value="com.smartmind.biz" />
+	 <property name="routerPackage" value="com.smartmind.biz.router" />
+	 <property name="module" value="smartmind" />
+	 <property name="isRun" value="true"/>
+     <property name="isCurdGen" value="true"/>
+     <property name="isVoGen" value="false"/>
+
+    	<plugin type="org.zfes.snowier.cloud.zbss.datav.generator.OverIsMergeablePlugin"/>
+		<plugin type="org.mybatis.generator.plugins.ToStringPlugin"></plugin>
+		<plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin"></plugin>
+		<plugin type="org.mybatis.generator.plugins.SerializablePlugin"></plugin>
+		<plugin type="org.mybatis.generator.plugins.MapperAnnotationPlugin"></plugin>
+
+        <commentGenerator type="org.mybatis.generator.internal.DefaultCommentGenerator">
+              <property name="suppressAllComments" value="true" />
+            <property name="suppressDate" value="true" />
+        </commentGenerator>
+
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+          connectionURL="jdbc:mysql://127.0.0.1:3307/legend_smartmind?serverTimezone=GMT%2B8&amp;useSSL=false"
+           userId="root" password="root">
+           <property name="nullCatalogMeansCurrent" value="true"/>
+        </jdbcConnection>
+
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="false" />
+        </javaTypeResolver>
+
+        <javaModelGenerator targetPackage="" targetProject="src/main/java/">
+            <property name="enableSubPackages" value="true" />
+            <property name="trimStrings" value="true" />
+            <property name="rootClass" value="org.legend.framework.core.data.IBaseModel"/>
+        </javaModelGenerator>
+
+        <sqlMapGenerator targetPackage="" targetProject="src/main/java/">
+            <property name="enableSubPackages" value="true" />
+        </sqlMapGenerator>
+
+        <javaClientGenerator targetPackage="" type="XMLMAPPER"    targetProject="src/main/java/">
+            <property name="enableSubPackages" value="true" />
+            <property name="rootInterface" value="org.legend.framework.dao.mybatis.BaseMapper"/>
+        </javaClientGenerator>
+        
+        <!-- 课堂教学模块 
+        <table tableName="smd_class_session" domainObjectName="ClassSession" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/classsession"/>
+           <property name="desc" value="课堂教学"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_class_activity" domainObjectName="ClassActivity" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/classactivity"/>
+           <property name="desc" value="课堂活动"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_class_activity_resource" domainObjectName="ClassActivityResource" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/classactivityresource"/>
+           <property name="desc" value="课堂活动资源关联"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_class_activity_submit" domainObjectName="ClassActivitySubmit" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/classactivitysubmit"/>
+           <property name="desc" value="学生课堂活动提交"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_class_activity_submit_detail" domainObjectName="ClassActivitySubmitDetail" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/classactivitysubmitdetail"/>
+           <property name="desc" value="学生课堂活动提交明细"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+ 	-->
+        <!--
+        <table tableName="smd_discussion_topic" domainObjectName="DiscussionTopic" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/discussionTopic"/>
+           <property name="desc" value="讨论活动话题"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+
+	<table tableName="smd_experiment_guide" domainObjectName="ExperimentGuide" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/experimentGuide"/>
+           <property name="desc" value="实验指导书"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+       
+        
+       <table tableName="smd_course" domainObjectName="Course" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/course"/>
+           <property name="desc" value="课程信息"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_learning_unit" domainObjectName="LearningUnit" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/learningunit"/>
+           <property name="desc" value="学习单元"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_clazz" domainObjectName="Clazz" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/clazz"/>
+           <property name="desc" value="班级信息"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_student" domainObjectName="Student" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/student"/>
+           <property name="desc" value="学生信息"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_teacher" domainObjectName="Teacher" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/teacher"/>
+           <property name="desc" value="教师信息"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_class_student" domainObjectName="ClassStudent" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/classstudent"/>
+           <property name="desc" value="学生班级关联"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_class_course" domainObjectName="ClassCourse" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/classcourse"/>
+           <property name="desc" value="班级课程关联"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_teacher_course_class" domainObjectName="TeacherCourseClass" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/teachercourseclass"/>
+           <property name="desc" value="教师课程班级关联"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_teaching_file" domainObjectName="TeachingFile" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/teachingfile"/>
+           <property name="desc" value="教学文件"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+ -->
+ 
+ 
+       <!-- 备课阶段模块
+       <table tableName="smd_teaching_plan" domainObjectName="TeachingPlan" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/teachingplan"/>
+           <property name="desc" value="教案"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_teaching_plan_content" domainObjectName="TeachingPlanContent" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/teachingplancontent"/>
+           <property name="desc" value="教案内容"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_question" domainObjectName="Question" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/question"/>
+           <property name="desc" value="题目"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_exam_paper" domainObjectName="ExamPaper" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/exampaper"/>
+           <property name="desc" value="试卷"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_exam_paper_question" domainObjectName="ExamPaperQuestion" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/exampaperquestion"/>
+           <property name="desc" value="试卷题目关联"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_paper_template" domainObjectName="PaperTemplate" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/papertemplate"/>
+           <property name="desc" value="试卷模板"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_template_question_rule" domainObjectName="TemplateQuestionRule" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/templatequestionrule"/>
+           <property name="desc" value="模板选题规则"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+        -->
+
+       <!-- 签到模块 
+       <table tableName="smd_sign_in_activity" domainObjectName="SignInActivity" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/signinactivity"/>
+           <property name="desc" value="签到活动"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_sign_in_record" domainObjectName="SignInRecord" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/signinrecord"/>
+           <property name="desc" value="签到记录"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+-->
+       <!-- 课堂活动模块
+       <table tableName="smd_class_activity" domainObjectName="ClassActivity" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/classactivity"/>
+           <property name="desc" value="课堂活动"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_class_activity_question" domainObjectName="ClassActivityQuestion" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/classactivityquestion"/>
+           <property name="desc" value="活动题目关联"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_class_activity_submit" domainObjectName="ClassActivitySubmit" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/classactivitysubmit"/>
+           <property name="desc" value="活动提交记录"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_class_activity_answer" domainObjectName="ClassActivityAnswer" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/classactivityanswer"/>
+           <property name="desc" value="活动答题记录"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_activity_submit_statistics" domainObjectName="ActivitySubmitStatistics" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/activitysubmitstatistics"/>
+           <property name="desc" value="提交统计"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_activity_question_statistics" domainObjectName="ActivityQuestionStatistics" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/activityquestionstatistics"/>
+           <property name="desc" value="题目统计"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+ -->
+       <!-- 课后分析模块 
+       <table tableName="smd_knowledge_heatmap" domainObjectName="KnowledgeHeatmap" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/knowledgeheatmap"/>
+           <property name="desc" value="知识点热力图"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_learning_report" domainObjectName="LearningReport" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/learningreport"/>
+           <property name="desc" value="学情报告"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_standard_achievement" domainObjectName="StandardAchievement" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/standardachievement"/>
+           <property name="desc" value="课标达成度"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_ability_transition" domainObjectName="AbilityTransition" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/abilitytransition"/>
+           <property name="desc" value="能力跃迁"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_learning_snapshot" domainObjectName="LearningSnapshot" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/learningsnapshot"/>
+           <property name="desc" value="学习快照"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+
+       <table tableName="smd_data_export_log" domainObjectName="DataExportLog" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/dataexportlog"/>
+           <property name="desc" value="数据导出日志"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+     
+
+  <table tableName="smd_courseware" domainObjectName="Courseware" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/courseware"/>
+           <property name="desc" value="课件管理"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+        
+       
+       <table tableName="smd_teaching_plan" domainObjectName="TeachingPlan" enableCountByExample="false" enableUpdateByExample="false" enableDeleteByExample="false" enableSelectByExample="false" selectByExampleQueryId="false">
+           <property name="useActualColumnNames" value="false"/>
+           <property name="nameSpace" value="/manage/smartmind/teachingplan"/>
+           <property name="desc" value="教案"/>
+           <property name="KeyType" value="Auto"/>
+           <property name="KeyGenerator" value="base36Snowid"/>
+       </table>
+ -->
+       
+      </context>
+</generatorConfiguration>

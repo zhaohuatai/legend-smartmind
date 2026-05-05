@@ -1,0 +1,79 @@
+package com.smartmind.biz.service.impl;
+import java.util.List;
+import java.util.Optional;
+import org.legend.framework.core.auth.SimpleUserBo;
+import org.legend.framework.core.data.DataSetDto;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.legend.framework.core.util.ZStrUtil;
+import org.legend.framework.core.util.ZAlert;
+import org.legend.framework.core.util.ZAssert;
+import org.legend.framework.core.util.ZBeanUtil;
+import org.legend.framework.base.redundant.RedundantHandler;
+import com.google.common.collect.Lists;
+import org.legend.framework.base.dao.mybatis.BaseMapper;
+import org.legend.framework.core.data.StatusListDto;
+import org.legend.framework.core.data.StatusDto;
+import com.smartmind.biz.bo.dto.learningsnapshot.LearningSnapshotCreateDto;
+import com.smartmind.biz.bo.dto.learningsnapshot.LearningSnapshotUpdateDto;
+import com.smartmind.biz.bo.dto.learningsnapshot.LearningSnapshotPageQueryDto;
+import com.smartmind.biz.bo.dto.learningsnapshot.LearningSnapshotConvert;
+import org.legend.framework.bss.cache.DictCache;
+import org.legend.framework.base.service.BaseServiceImpl;
+import org.legend.framework.core.data.SelectVo;
+import org.legend.framework.base.redundant.Ref;
+import org.legend.framework.base.redundant.Self;
+import com.smartmind.biz.service.ILearningSnapshotService;
+import com.smartmind.biz.dao.LearningSnapshotMapper;
+import com.smartmind.biz.bo.model.LearningSnapshot;
+@Service
+public class LearningSnapshotServiceImpl extends BaseServiceImpl<LearningSnapshotMapper, LearningSnapshot> implements ILearningSnapshotService{
+ 	@Autowired
+	private LearningSnapshotMapper learningSnapshotMapper;
+	
+	@Override
+	public BaseMapper<LearningSnapshot> getMapper() {
+		return learningSnapshotMapper;
+	}
+	
+	@Transactional(rollbackFor=Exception.class)
+	@Override
+	public	int createLearningSnapshot(LearningSnapshotCreateDto learningSnapshotCreateDto,SimpleUserBo simpleUser){
+		ZBeanUtil.validateBean(learningSnapshotCreateDto);
+		LearningSnapshot learningSnapshot = LearningSnapshotConvert.INSTANCE.convert(learningSnapshotCreateDto);
+		
+	      
+		RedundantHandler.fillRedunFields(Self.newSelf( learningSnapshot, "classId","className"),Ref.newRef("SmdClazz", "id","className"));
+		RedundantHandler.fillRedunFields(Self.newSelf( learningSnapshot, "courseId","courseName"),Ref.newRef("SmdCourse", "id","courseName"));
+	   
+		return create(learningSnapshot);
+	}
+	
+	@Transactional(rollbackFor=Exception.class)
+	@Override
+	public	int updateLearningSnapshot(LearningSnapshotUpdateDto learningSnapshotCreateDto,SimpleUserBo simpleUser){
+		ZBeanUtil.validateBean(learningSnapshotCreateDto);
+		LearningSnapshot learningSnapshot = LearningSnapshotConvert.INSTANCE.convert(learningSnapshotCreateDto);
+		RedundantHandler.fillRedunFields(Self.newSelf( learningSnapshot, "classId","className"),Ref.newRef("SmdClazz", "id","className"));
+		RedundantHandler.fillRedunFields(Self.newSelf( learningSnapshot, "courseId","courseName"),Ref.newRef("SmdCourse", "id","courseName"));
+	
+		
+		return  updateById(learningSnapshot);
+	}
+	
+	
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void setStatus(StatusListDto statusListDto) {
+		ZBeanUtil.validateBean(statusListDto);
+		setStatusByIds(statusListDto.getIds(),  statusListDto.getStatus()) ;
+	}
+	@Override
+	@Transactional(rollbackFor=Exception.class)
+	public void setStatus(StatusDto status) {
+		ZBeanUtil.validateBean(status);
+		setStatusById(status.getId(),  status.getStatus()) ;
+	}
+	
+}

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.smartmind.biz.dao.LearningUnitMapper" >
+
+    <!-- 查询课程下指定父单元的最大unitCode(树形编码) -->
+    <select id="selectMaxTreeCodeByCourseIdAndParentId" resultType="java.lang.String">
+        SELECT MAX(unit_code) 
+        FROM smd_learning_unit 
+        WHERE course_id = #{courseId} 
+          AND parent_id = #{parentId}
+          AND status = '1'
+    </select>
+
+    <!-- 查询指定父单元下的最大unitCode(树形编码) -->
+    <select id="selectMaxTreeCodeByParentId" resultType="java.lang.String">
+        SELECT MAX(unit_code) 
+        FROM smd_learning_unit 
+        WHERE parent_id = #{parentId}
+          AND status = '1'  
+    </select>
+
+    <!-- 根据unitCode like删除子单元 -->
+    <delete id="deleteByUnitCodeLike">
+        DELETE FROM smd_learning_unit 
+        WHERE course_id = #{courseId} 
+          AND unit_code LIKE #{unitCodePattern}
+    </delete>
+
+    <!-- 根据ID列表查询单元 -->
+    <select id="selectByIds" resultType="com.smartmind.biz.bo.model.LearningUnit">
+        SELECT * FROM smd_learning_unit 
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+</mapper>

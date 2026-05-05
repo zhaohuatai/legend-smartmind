@@ -1,0 +1,61 @@
+server:
+ port: 8080
+ compression:
+  enabled: false
+
+
+spring:
+ datasource:
+  driver-class-name: com.mysql.cj.jdbc.Driver  # com.mysql.jdbc.Driver
+  name: datasource # Name of the datasource.
+  url: jdbc:mysql://127.0.0.1:3307/legend_smartmind?allowMutiQueries=true&rewriteBatchedStatements=true&useUnicode=true&serverTimezone=GMT%2B8&characterEncoding=UTF-8&useSSL=true&autoReconnect=true#&zeroDateTimeBehavior=convertToNull # JDBC url of the database.
+  username: root
+  password: 
+  druid:
+   initialSize: 6
+   minIdle: 5
+   maxActive: 10
+   maxWait: 60000
+   timeBetweenEvictionRunsMillis: 60000
+   minEvictableIdleTimeMillis: 300000
+   validationQuery: SELECT 1 from dual
+   testWhileIdle: true
+   testOnBorrow: false
+   testOnReturn: false
+   poolPreparedStatements: true
+   maxPoolPreparedStatementPerConnectionSize: 21
+   web-stat-filter: 
+    enabled: true
+   filters: stat #wall,stat 
+ data:
+  redis: 
+    host: 127.0.0.1 #192.168.129.226
+    password: 
+    port: 6379
+    #serial-type: protstuff
+
+custom: 
+ datasource:
+  names: timed-datasource
+  timedDataSource: 
+   driver-class-name: com.mysql.cj.jdbc.Driver  # com.mysql.jdbc.Driver
+   name: timed-datasource # Name of the datasource.
+   url: jdbc:mysql://127.0.0.1:3306/legend_pet?allowMutiQueries=true&rewriteBatchedStatements=true&useUnicode=true&serverTimezone=GMT%2B8&characterEncoding=UTF-8&useSSL=true&autoReconnect=true#&zeroDateTimeBehavior=convertToNull # JDBC url of the database.
+   username: root
+   password: 
+   druid:
+    initialSize: 6
+    minIdle: 5
+    maxActive: 10
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 from dual
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 21
+    web-stat-filter: 
+     enabled: true
+    filters: wall,stat
